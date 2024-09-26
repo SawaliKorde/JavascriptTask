@@ -166,7 +166,7 @@ function showError(row, fieldName, message) {
     error.innerText = `${fieldName} ${message}`;
     row.appendChild(error);
 
-    // Automatically remove error after a few seconds
+    
     setTimeout(() => {
         if (error.parentNode) {
             error.parentNode.removeChild(error);
