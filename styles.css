@@ -1,8 +1,4 @@
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
+
 
 body {
     font-family: Arial, sans-serif;
@@ -10,14 +6,31 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
 }
 
 .table-container {
-    background-color: #fff;
-    padding: 20px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
 }
+
+.btn-add {
+    padding: 10px 20px;
+    background-color: #add8e6;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-weight: 500;
+    font-size: 16px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.3s ease;
+}
+
+
 
 table {
     width: 100%;
@@ -35,4 +48,15 @@ th {
     background-color: #f4f4f4;
 }
 
+.error-message {
+    color: red;
+    font-size: 0.8em;
+    margin-top: 2px;
+}
 
+td {
+    position: relative;
+}
+.cell-content {
+    min-height: 1em;
+}
