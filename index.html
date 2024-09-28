@@ -20,19 +20,19 @@
 <body>
     <div class="table-container">
         <h2 style="font-weight: lighter;">Chemical Supplies</h2>
-        <button class="btn-add" onclick="addNewEntry(this)">Add New <svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor"
+        <button class="btn-add" onclick="addNewEntry(this)" aria-label="Add a new chemical entry">Add New <svg data-slot="icon" fill="none" stroke-width="1.5" stroke="currentColor"
                 viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="24" height="24">
                 <path stroke-linecap="round" stroke-linejoin="round"
                     d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path>
             </svg></button>
             <div class="navigation-buttons">
-                <button class="btn-operations"   id="upButton" style="background: none; border: none; cursor: pointer;" onclick="navigateTable('up')"><svg data-slot="icon" fill="none" stroke-width="2" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="24" height="24">
+                <button class="btn-operations"   id="upButton" aria-label="Navigate up in the table also you can use up key arrow in keyboard" style="background: none; border: none; cursor: pointer;" onclick="navigateTable('up')"><svg data-slot="icon" fill="none" stroke-width="2" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="24" height="24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75 12 3m0 0 3.75 3.75M12 3v18"></path>
                   </svg></button>
-                <button class="btn-operations"  style="background: none; border: none; cursor: pointer;" id="downButton" onclick="navigateTable('down')"><svg data-slot="icon" fill="none" stroke-width="2" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="24" height="24">
+                <button class="btn-operations" aria-label="Navigate down in the table also you can use down  key arrow in keyboard" style="background: none; border: none; cursor: pointer;" id="downButton" onclick="navigateTable('down')"><svg data-slot="icon" fill="none" stroke-width="2" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="24" height="24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25 12 21m0 0-3.75-3.75M12 21V3"></path>
                   </svg></button>
-                <button class="btn-operations"  id="refreshButton" style="background: none; border: none; cursor: pointer;" onclick="refreshTable()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
+                <button class="btn-operations" aria-label="Refresh the Table"  id="refreshButton" style="background: none; border: none; cursor: pointer;" onclick="refreshTable()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
                     <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/>
                     <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/>
                   </svg>
@@ -43,15 +43,15 @@
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th onclick="sortTable('chemicalName')">Chemical Name <span class="sort-arrow" id="arrow-chemicalName"></span></th>
-                        <th onclick="sortTable('vendor')">Vendor <span class="sort-arrow" id="arrow-vendor"></span></th>
-                        <th onclick="sortTable('density')">Density (g/m²) <span class="sort-arrow" id="arrow-density"></span></th>
-                        <th onclick="sortTable('viscosity')">Viscosity (m²/s) <span class="sort-arrow" id="arrow-viscosity"></span></th>
-                        <th onclick="sortTable('packaging')">Packaging <span class="sort-arrow" id="arrow-packaging"></span></th>
-                        <th onclick="sortTable('packSize')">Pack Size <span class="sort-arrow" id="arrow-packSize"></span></th>
-                        <th onclick="sortTable('unit')">Unit <span class="sort-arrow" id="arrow-unit"></span></th>
-                        <th onclick="sortTable('quantity')">Quantity <span class="sort-arrow" id="arrow-quantity"></span></th>
-                        <th>Actions</th>
+                        <th scope="col" onclick="sortTable('chemicalName')">Chemical Name <span class="sort-arrow" id="arrow-chemicalName"></span></th>
+                        <th scope="col" onclick="sortTable('vendor')">Vendor <span class="sort-arrow" id="arrow-vendor"></span></th>
+                        <th scope="col" onclick="sortTable('density')">Density (g/m²) <span class="sort-arrow" id="arrow-density"></span></th>
+                        <th scope="col" onclick="sortTable('viscosity')">Viscosity (m²/s) <span class="sort-arrow" id="arrow-viscosity"></span></th>
+                        <th scope="col" onclick="sortTable('packaging')">Packaging <span class="sort-arrow" id="arrow-packaging"></span></th>
+                        <th scope="col" onclick="sortTable('packSize')">Pack Size <span class="sort-arrow" id="arrow-packSize"></span></th>
+                        <th scope="col" onclick="sortTable('unit')">Unit <span class="sort-arrow" id="arrow-unit"></span></th>
+                        <th scope="col" onclick="sortTable('quantity')">Quantity <span class="sort-arrow" id="arrow-quantity"></span></th>
+                        <th scope="col">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
