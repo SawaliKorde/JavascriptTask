@@ -1,15 +1,35 @@
-
+/* Custom styles */
+:root {
+    --primary-bg: #f7f7f7;
+    --table-border: #ddd;
+    --header-bg: #f4f4f4;
+    --btn-bg: #add8e6;
+    --btn-hover-bg: #9ac8d8;
+    --error-color: #dc3545;
+}
 
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f7f7f7;
+    background-color: var(--primary-bg);
     display: flex;
     justify-content: center;
     align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
 }
 
 .table-container {
     position: relative;
+    width: 100%;
+    max-width: 1200px;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    
 }
 
 .btn-add {
@@ -19,8 +39,8 @@ body {
     border: none;
     cursor: pointer;
     position: absolute;
-    top: 0;
-    right: 0;
+    top: 0px;
+    right: 20px;
     font-weight: 500;
     font-size: 16px;
     color: #333;
@@ -30,33 +50,64 @@ body {
     transition: background-color 0.3s ease;
 }
 
+.btn-add:hover {
+    background-color: var(--btn-hover-bg);
+}
 
-
-table {
+.table-custom {
     width: 100%;
-    border-collapse: collapse;
     margin-bottom: 20px;
 }
 
-th, td {
+.table-custom th,
+.table-custom td {
     padding: 12px;
-    border: 1px solid #ddd;
-    text-align: left;
+    border: 1px solid var(--table-border);
 }
 
-th {
-    background-color: #f4f4f4;
+.table-custom th {
+    background-color: var(--header-bg);
 }
 
 .error-message {
-    color: red;
+    color: var(--error-color);
     font-size: 0.8em;
     margin-top: 2px;
 }
 
-td {
-    position: relative;
-}
 .cell-content {
     min-height: 1em;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .table-container {
+        padding: 10px;
+    }
+
+    .btn-add {
+        position: static;
+        margin-bottom: 15px;
+    }
+
+    .table-custom {
+        font-size: 0.9em;
+    }
+}
+
+@media (max-width: 430px) {
+    .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .table-custom {
+        min-width: 100%;
+        width: max-content;
+    }
+
+    .btn-add {
+        width: 100%;
+        justify-content: center;
+    }
 }
