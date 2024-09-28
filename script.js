@@ -5,6 +5,7 @@ const addNewEntryModal = new bootstrap.Modal(document.getElementById('addNewModa
 let lastId = 15;
 let currentSortColumn = '';
 let currentSortOrder = 'asc';
+let currentRow = -1;
 
 // Function to fetch JSON data and populate the table
 async function populateTable() {
@@ -46,7 +47,7 @@ async function populateTable() {
             `;
         });
 
-        
+
         window.invoicesData = invoicesData;
 
     } catch (error) {
@@ -60,10 +61,10 @@ function editRow(button) {
     const cells = row.querySelectorAll('td[contenteditable="false"]');
 
     // Highlight the row and cells
-    row.style.backgroundColor = '#e0f7fa'; 
+    row.style.backgroundColor = '#e0f7fa';
     cells.forEach(cell => {
         cell.setAttribute('contenteditable', 'true');
-        cell.style.backgroundColor = '#ffe0b2'; 
+        cell.style.backgroundColor = '#ffe0b2';
     });
 
     // Show the Save button
@@ -79,7 +80,7 @@ function editRow(button) {
         }
     };
 
-    
+
     row.addEventListener('keypress', handleKeyPress);
 
     // Click outside to cancel edit
@@ -89,7 +90,7 @@ function editRow(button) {
             document.removeEventListener('click', handleClickOutside);
         }
     };
-    
+
     document.addEventListener('click', handleClickOutside);
 }
 
@@ -97,7 +98,7 @@ function cancelEdit(row) {
     const cells = row.querySelectorAll('td[contenteditable="true"]');
     cells.forEach(cell => {
         cell.setAttribute('contenteditable', 'false');
-        cell.style.backgroundColor = ''; 
+        cell.style.backgroundColor = '';
     });
 
     row.style.backgroundColor = ''; // Reset row background
@@ -106,14 +107,14 @@ function cancelEdit(row) {
 
     // Remove the keypress event listener and click outside listener
     row.removeEventListener('keypress', row.dataset.keyPressHandler);
-    delete row.dataset.keyPressHandler; 
+    delete row.dataset.keyPressHandler;
 }
 
 
 // Function to save the changes with validation
 function saveRow(button, index) {
     const row = button.closest('tr');
-    const cells = row.querySelectorAll('td[contenteditable="true"]');
+    const cells = row.querySelectorAll('td[contenteditable]');
 
     // Define regex patterns
     const namePattern = /^[a-zA-Z\s]+$/;
@@ -183,13 +184,13 @@ document.getElementById('confirmDelete').addEventListener('click', function () {
     if (rowToDelete) {
         rowToDelete.remove(); // Delete the stored row
         showToast('Row deleted successfully', 'green');
-        deleteModal.hide(); 
+        deleteModal.hide();
     }
 });
 
 // Cancel deletion and hide the modal
 document.getElementById('deleteConfirmModal').addEventListener('hidden.bs.modal', function () {
-    rowToDelete = null; 
+    rowToDelete = null;
 });
 
 // Show a toast notification
@@ -217,14 +218,21 @@ function addNewEntry() {
     const saveButton = document.getElementById('saveNewEntry');
     const form = document.getElementById('addNewForm');
 
-   
     addNewEntryModal.show();
 
-    // Clear previous event listeners to avoid multiple triggers
-    saveButton.replaceWith(saveButton.cloneNode(true)); // This resets the button
+    // Remove previous event listeners
+    saveButton.replaceWith(saveButton.cloneNode(true));
     const newSaveButton = document.getElementById('saveNewEntry');
 
     newSaveButton.addEventListener('click', () => {
+        document.getElementById('chemicalNameError').innerText = '';
+        document.getElementById('vendorError').innerText = '';
+        document.getElementById('densityError').innerText = '';
+        document.getElementById('viscosityError').innerText = '';
+        document.getElementById('packagingError').innerText = '';
+        document.getElementById('packSizeError').innerText = '';
+        document.getElementById('unitError').innerText = '';
+        document.getElementById('quantityError').innerText = '';
         // Gather input values
         const chemicalName = document.getElementById('chemicalName').value.trim();
         const vendor = document.getElementById('vendor').value.trim();
@@ -242,49 +250,49 @@ function addNewEntry() {
 
         // Perform validation
         if (!namePattern.test(chemicalName)) {
-            showToast('Chemical Name is invalid', 'blue');
+            document.getElementById('chemicalNameError').innerText = 'Please use alphabets only (exp: a,b,c)';
             return;
         }
         if (!namePattern.test(vendor)) {
-            showToast('Vendor is invalid', 'blue');
+            document.getElementById('vendorError').innerText = 'Please use alphabets only (exp: a,b,c)';
             return;
         }
-        if (!numberPattern(density) || density <= 0) {
-            showToast('Density must be a positive number', 'blue');
+        if (!numberPattern.test(density.toString()) || density <= 0) {
+            document.getElementById('densityError').innerText = 'Density must be positive number';
             return;
         }
-        if (!numberPattern(viscosity) || viscosity <= 0) {
-            showToast('Viscosity must be a positive number', 'blue');
+        if (!numberPattern.test(viscosity.toString()) || viscosity <= 0) {
+            document.getElementById('viscosityError').innerText = 'Viscosity must be positive number';
             return;
         }
         if (!namePattern.test(packaging)) {
-            showToast('Packaging is invalid', 'blue');
+            document.getElementById('packagingError').innerText = 'Packaging is invalid';
             return;
         }
-        if (!numberPattern(packSize) || packSize <= 0) {
-            showToast('Pack Size must be a positive number', 'blue');
+        if (!numberPattern.test(packSize.toString()) || packSize <= 0) {
+            document.getElementById('packSizeError').innerText = 'Packsize must be a positive number';
             return;
         }
         if (!unitPattern.test(unit)) {
-            showToast('Unit must be either "kg" or "L"', 'blue');
+            document.getElementById('chemicalNameError').innerText = 'Unit must be either "kg" or "L"';
             return;
         }
-        if (!numberPattern(quantity) || quantity <= 0) {
-            showToast('Quantity must be a positive number', 'blue');
+        if (!numberPattern.test(quantity.toString()) || quantity <= 0) {
+            document.getElementById('quantityError').innerText = 'Quantity must be positive number';
             return;
         }
 
-        // If validation passes, create a new entry object with an auto-incremented ID
+        // If validation passes, create a new entry object
         const newEntry = {
-            'ID': ++lastId, // Increment lastId and assign it to the new entry
-            'Chemical Name': chemicalName,
-            'Vendor': vendor,
-            'Density': density,
-            'Viscosity': viscosity,
-            'Packaging': packaging,
-            'Pack Size': packSize,
-            'Unit': unit,
-            'Quantity': quantity
+            id: ++lastId,
+            chemicalName: chemicalName,
+            vendor: vendor,
+            density: density,
+            viscosity: viscosity,
+            packaging: packaging,
+            packSize: packSize,
+            unit: unit,
+            quantity: quantity
         };
 
         // Add the new entry to the global data
@@ -294,15 +302,15 @@ function addNewEntry() {
         const tableBody = document.getElementById('tableBody');
         const newRowHTML = `
             <tr>
-                <td>${newEntry.ID}</td>
-                <td contenteditable="true">${chemicalName}</td>
-                <td contenteditable="true">${vendor}</td>
-                <td contenteditable="true">${density}</td>
-                <td contenteditable="true">${viscosity}</td>
-                <td contenteditable="true">${packaging}</td>
-                <td contenteditable="true">${packSize}</td>
-                <td contenteditable="true">${unit}</td>
-                <td >${quantity}</td>
+                <td>${newEntry.id}</td>
+                <td contenteditable="false">${newEntry.chemicalName}</td>
+                <td contenteditable="false">${newEntry.vendor}</td>
+                <td contenteditable="false">${newEntry.density.toFixed(2)}</td>
+                <td contenteditable="false">${newEntry.viscosity.toFixed(2)}</td>
+                <td contenteditable="false">${newEntry.packaging}</td>
+                <td contenteditable="false">${newEntry.packSize.toFixed(2)}</td>
+                <td contenteditable="false">${newEntry.unit}</td>
+                <td contenteditable="false">${newEntry.quantity.toFixed(2)}</td>
                 <td>
                     <button class="edit-btn" onclick="editRow(this)" style="background: none; border: none; cursor: pointer;">
                         <svg fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="24" height="24">
@@ -320,8 +328,7 @@ function addNewEntry() {
                         </svg>
                     </button>
                 </td>
-            </tr>
-        `;
+            `;
         tableBody.insertAdjacentHTML('beforeend', newRowHTML);
 
         // Hide the modal
@@ -339,13 +346,13 @@ function addNewEntry() {
 function sortTable(column) {
     const tableBody = document.getElementById('tableBody');
     const rows = Array.from(tableBody.rows);
-    
+
     // Determine the sort order
     let sortOrder = 'asc';
     if (currentSortColumn === column && currentSortOrder === 'asc') {
         sortOrder = 'desc';
     }
-    
+
     // Sort rows based on the column clicked
     rows.sort((a, b) => {
         const cellA = a.cells[getColumnIndex(column)].innerText;
@@ -390,11 +397,46 @@ function updateSortArrows() {
     arrows.forEach(arrow => {
         arrow.innerText = ''; // Clear previous arrows
     });
-    
+
     const currentArrow = document.getElementById(`arrow-${currentSortColumn}`);
     currentArrow.innerText = currentSortOrder === 'asc' ? ' ↑' : ' ↓';
 }
 
+
+function highlightRow(index) {
+    const rows = document.querySelectorAll('#tableBody tr');
+    rows.forEach(row => row.classList.remove('highlight')); // Remove highlight from all rows
+    if (index >= 0 && index < rows.length) {
+        rows[index].classList.add('highlight'); // Add highlight to the current row
+        rows[index].scrollIntoView({ behavior: "smooth", block: "center" }); // Scroll the highlighted row into view
+    }
+}
+
+// Function to navigate through the table
+function navigateTable(direction) {
+    const rows = document.querySelectorAll('#tableBody tr');
+    if (direction === 'down') {
+        currentRow = Math.min(currentRow + 1, rows.length - 1); // Move down
+    } else if (direction === 'up') {
+        currentRow = Math.max(currentRow - 1, 0); // Move up
+    }
+    highlightRow(currentRow); // Highlight the current row
+}
+
+// Event listener for keyboard navigation
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowDown') {
+        event.preventDefault(); // Prevent default scrolling behavior
+        navigateTable('down'); // Navigate down
+    } else if (event.key === 'ArrowUp') {
+        event.preventDefault(); // Prevent default scrolling behavior
+        navigateTable('up'); // Navigate up
+    }
+});
+
+function refreshTable() {
+    location.reload();
+}
 
 // Populate the table on page load
 window.onload = populateTable;

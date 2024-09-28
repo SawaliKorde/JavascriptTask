@@ -25,6 +25,19 @@
                 <path stroke-linecap="round" stroke-linejoin="round"
                     d="M12 9v6m3-3H9m12 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path>
             </svg></button>
+            <div class="navigation-buttons">
+                <button class="btn-operations"   id="upButton" style="background: none; border: none; cursor: pointer;" onclick="navigateTable('up')"><svg data-slot="icon" fill="none" stroke-width="2" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="24" height="24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75 12 3m0 0 3.75 3.75M12 3v18"></path>
+                  </svg></button>
+                <button class="btn-operations"  style="background: none; border: none; cursor: pointer;" id="downButton" onclick="navigateTable('down')"><svg data-slot="icon" fill="none" stroke-width="2" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="24" height="24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25 12 21m0 0-3.75-3.75M12 21V3"></path>
+                  </svg></button>
+                <button class="btn-operations"  id="refreshButton" style="background: none; border: none; cursor: pointer;" onclick="refreshTable()"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/>
+                    <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/>
+                  </svg>
+                </button>
+            </div>
         <div class="table-wrapper">
             <table class="table-custom">
                 <thead>
@@ -48,48 +61,64 @@
         </div>
     </div>
     <div class="modal fade" id="addNewModal" tabindex="-1" aria-labelledby="addNewModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg"> 
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="addNewModalLabel">Add New Chemical</h5>
+                    <h5 class="modal-title" id="addNewModalLabel">Add New Chemical Data</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <form id="addNewForm">
-                        <div class="mb-3">
-                            <label for="chemicalName" class="form-label">Chemical Name</label>
-                            <input type="text" class="form-control" id="chemicalName" required>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="chemicalName" class="form-label">Chemical Name</label>
+                                <input type="text" class="form-control" id="chemicalName" required>
+                                <div class="text-danger" id="chemicalNameError"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="vendor" class="form-label">Vendor</label>
+                                <input type="text" class="form-control" id="vendor" required>
+                                <div class="text-danger" id="vendorError"></div>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="vendor" class="form-label">Vendor</label>
-                            <input type="text" class="form-control" id="vendor" required>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="density" class="form-label">Density (g/m²)</label>
+                                <input type="number" class="form-control" id="density" step="0.01" required>
+                                <div class="text-danger" id="densityError"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="viscosity" class="form-label">Viscosity (m²/s)</label>
+                                <input type="number" class="form-control" id="viscosity" step="0.01" required>
+                                <div class="text-danger" id="viscosityError"></div>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="density" class="form-label">Density (g/m²)</label>
-                            <input type="number" class="form-control" id="density" step="0.01" required>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="packaging" class="form-label">Packaging</label>
+                                <input type="text" class="form-control" id="packaging" required>
+                                <div class="text-danger" id="packagingError"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="packSize" class="form-label">Pack Size</label>
+                                <input type="number" class="form-control" id="packSize" step="0.01" required>
+                                <div class="text-danger" id="packSizeError"></div>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="viscosity" class="form-label">Viscosity (m²/s)</label>
-                            <input type="number" class="form-control" id="viscosity" step="0.01" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="packaging" class="form-label">Packaging</label>
-                            <input type="text" class="form-control" id="packaging" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="packSize" class="form-label">Pack Size</label>
-                            <input type="number" class="form-control" id="packSize" step="0.01" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="unit" class="form-label">Unit</label>
-                            <select class="form-select" id="unit" required>
-                                <option value="kg">kg</option>
-                                <option value="L">L</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="quantity" class="form-label">Quantity</label>
-                            <input type="number" class="form-control" id="quantity" step="0.01" required>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="unit" class="form-label">Unit</label>
+                                <select class="form-select" id="unit" required>
+                                    <option value="kg">kg</option>
+                                    <option value="L">L</option>
+                                    <div class="text-danger" id="unitError"></div>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="quantity" class="form-label">Quantity</label>
+                                <input type="number" class="form-control" id="quantity" step="0.01" required>
+                                <div class="text-danger" id="quantityError"></div>
+                            </div>
                         </div>
                     </form>
                 </div>
@@ -100,7 +129,7 @@
             </div>
         </div>
     </div>
-
+    
     <!-- Delete Confirmation Modal -->
     <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -119,7 +148,7 @@
             </div>
         </div>
     </div>
-
+    
     <!-- Toast container -->
     <div class="position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 11">
         <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
@@ -132,6 +161,7 @@
             </div>
         </div>
     </div>
+    
 
     <script src="script.js"></script>
 </body>

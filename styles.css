@@ -4,8 +4,9 @@
     --table-border: #ddd;
     --header-bg: #f4f4f4;
     --btn-bg: #add8e6;
-    --btn-hover-bg: #9ac8d8;
+    --btn-hover-bg: #458297;
     --error-color: #dc3545;
+    --highlight-color: #d1e7dd;
 }
 
 body {
@@ -20,6 +21,10 @@ body {
 .table-wrapper {
     width: 100%;
     overflow-x: auto;
+}
+
+.highlight {
+    background-color: var(--highlight-color);
 }
 
 .table-container {
@@ -48,6 +53,17 @@ body {
     align-items: center;
     gap: 8px;
     transition: background-color 0.3s ease;
+}
+
+.navigation-buttons {
+    padding: 5px 5px;
+    position: relative;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-operations {
+    color: blue;
 }
 
 .btn-add:hover {
