@@ -132,12 +132,12 @@ function saveRow(button, index) {
         const rule = validationRules[i];
 
         if (rule.required && !value) {
-            showError(row, rule.name, 'cannot be empty.');
+            showToast(`${rule.name} cannot be empty.`, 'blue');
             return;
         }
 
         if (!rule.pattern.test(value)) {
-            showError(row, rule.name, 'has an invalid format.');
+            showToast(`${rule.name} has an invalid format.`, 'blue');
             return;
         }
 
@@ -152,29 +152,17 @@ function saveRow(button, index) {
         cell.setAttribute('contenteditable', 'false');
         cell.style.backgroundColor = ''; // Reset cell background
     });
-    
+
     // Reset row background
-    row.style.backgroundColor = ''; 
+    row.style.backgroundColor = '';
 
     row.querySelector('.edit-btn').style.display = 'inline-block';
     button.style.display = 'none';
 
+    // Show success toast in green
+    showToast('Data saved successfully!', 'green');
+
     console.log('Updated data:', window.invoicesData);
-}
-
-// Function to show error messages
-function showError(row, fieldName, message) {
-    const error = document.createElement('div');
-    error.className = 'error-message';
-    error.innerText = `${fieldName} ${message}`;
-    row.appendChild(error);
-
-    
-    setTimeout(() => {
-        if (error.parentNode) {
-            error.parentNode.removeChild(error);
-        }
-    }, 3000);
 }
 
 
@@ -187,7 +175,7 @@ function deleteRow(button) {
 document.getElementById('confirmDelete').addEventListener('click', function () {
     if (rowToDelete) {
         rowToDelete.remove(); // Delete the stored row
-        showToast('Row deleted successfully');
+        showToast('Row deleted successfully', 'green');
         deleteModal.hide(); // Hide the modal after deletion
     }
 });
@@ -198,12 +186,21 @@ document.getElementById('deleteConfirmModal').addEventListener('hidden.bs.modal'
 });
 
 // Show a toast notification
-function showToast(message) {
+function showToast(message, color) {
     const toastElement = document.getElementById('liveToast');
     const toastBody = toastElement.querySelector('.toast-body');
     toastBody.textContent = message; // Set the message in the toast
 
-    const toast = new bootstrap.Toast(toastElement);
+    // Set toast background color based on success or error
+    if (color === 'green') {
+        toastElement.classList.add('bg-success', 'text-white');
+        toastElement.classList.remove('bg-primary');
+    } else if (color === 'blue') {
+        toastElement.classList.add('bg-primary', 'text-white');
+        toastElement.classList.remove('bg-success');
+    }
+
+    const toast = new bootstrap.Toast(toastElement, { delay: 3000, autohide: true });
     toast.show();
 }
 // Populate the table on page load
