@@ -6,6 +6,46 @@ let lastId = 15;
 let currentSortColumn = '';
 let currentSortOrder = 'asc';
 let currentRow = -1;
+let highlightTimeout;
+
+// Validation Rules
+const namePattern = /^[a-zA-Z\s]+$/;
+const numberPattern = /^[+]?\d*\.?\d+$/;
+const unitPattern = /^(kg|L)$/;
+
+const validationRules = [
+    { name: 'chemicalName', label: 'Chemical Name', pattern: namePattern, required: true },
+    { name: 'vendor', label: 'Vendor', pattern: namePattern, required: true },
+    { name: 'density', label: 'Density', pattern: numberPattern, required: true, type: 'float' },
+    { name: 'viscosity', label: 'Viscosity', pattern: numberPattern, required: true, type: 'float' },
+    { name: 'packaging', label: 'Packaging', pattern: namePattern, required: true },
+    { name: 'packSize', label: 'Pack Size', pattern: numberPattern, required: true, type: 'float' },
+    { name: 'unit', label: 'Unit', pattern: unitPattern, required: true },
+    { name: 'quantity', label: 'Quantity', pattern: numberPattern, required: true, type: 'float' }
+];
+
+function validateField(fieldName, value) {
+    const rule = validationRules.find(r => r.name === fieldName);
+    if (!rule) return { isValid: false, error: 'Unknown field' };
+
+    if (rule.required && !value.trim()) {
+        return { isValid: false, error: `${rule.label} cannot be empty.` };
+    }
+
+    if (!rule.pattern.test(value)) {
+        return { isValid: false, error: `${rule.label} has an invalid format.` };
+    }
+
+    if (rule.type === 'float') {
+        const numValue = parseFloat(value);
+        if (isNaN(numValue) || numValue <= 0) {
+            return { isValid: false, error: `${rule.label} must be a positive number.` };
+        }
+    }
+
+    return { isValid: true, value: rule.type === 'float' ? parseFloat(value) : value };
+}
+
 // Function to fetch JSON data and populate the table
 async function populateTable() {
     try {
@@ -28,7 +68,7 @@ async function populateTable() {
                 <td contenteditable="false">${invoice.quantity.toFixed(2)}</td>
                 <td>
                     <button title="Edit data in row" class="edit-btn" onclick="editRow(this)" style="background: none; border: none; cursor: pointer;">
-                        <svg fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="24" height="24">
+                        <svg fill="none" stroke-width="1.5" stroke="#1E90FF" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="24" height="24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"></path>
                         </svg>
                     </button>
@@ -38,7 +78,7 @@ async function populateTable() {
                         </svg>
                     </button>
                     <button title="Delete row" class="delete-btn" onclick="deleteRow(this)" style="background: none; border: none; cursor: pointer;">
-                        <svg fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="24" height="24">
+                        <svg fill="none" stroke-width="1.5" stroke="red" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="24" height="24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"></path>
                         </svg>
                     </button>
@@ -120,58 +160,31 @@ function cancelEdit(row) {
 function saveRow(button, index) {
     const row = button.closest('tr');
     const cells = row.querySelectorAll('td[contenteditable]');
-    let hasChanges = false; // Flag to track if any changes were made
-
-    // Define regex patterns
-    const namePattern = /^[a-zA-Z\s]+$/;
-    const numberPattern = /^[+]?\d*\.?\d+$/;
-    const unitPattern = /^(kg|L)$/;
-
-    // Define validation rules
-    const validationRules = [
-        { name: 'Chemical Name', pattern: namePattern, required: true },
-        { name: 'Vendor', pattern: namePattern, required: true },
-        { name: 'Density', pattern: numberPattern, required: true },
-        { name: 'Viscosity', pattern: numberPattern, required: true },
-        { name: 'Packaging', pattern: namePattern, required: true },
-        { name: 'Pack Size', pattern: numberPattern, required: true },
-        { name: 'Unit', pattern: unitPattern, required: true },
-        { name: 'Quantity', pattern: numberPattern, required: true }
-    ];
-
-    // Validate and extract values
+    let hasChanges = false;
     const updatedValues = {};
-    for (let i = 0; i < cells.length; i++) {
+
+    validationRules.forEach((rule, i) => {
         const value = cells[i].innerText.trim();
-        const rule = validationRules[i];
+        const result = validateField(rule.name, value);
 
-        if (rule.required && !value) {
-            showToast(`${rule.name} cannot be empty.`, 'blue');
-            revertToPreviousValues(cells); // Revert to previous values
-            return; // Exit on validation failure
+        if (!result.isValid) {
+            showToast(result.error, 'blue');
+            revertToPreviousValues(cells);
+            return;
         }
 
-        if (!rule.pattern.test(value)) {
-            showToast(`${rule.name} has an invalid format.`, 'blue');
-            revertToPreviousValues(cells); // Revert to previous values
-            return; // Exit on validation failure
-        }
-
-        // Check if value has changed
         if (previousValues[i] !== value) {
-            hasChanges = true; // Mark that changes were made
+            hasChanges = true;
         }
 
-        updatedValues[rule.name] = rule.pattern === numberPattern ? parseFloat(value) : value;
-    }
+        updatedValues[rule.name] = result.value;
+    });
 
-    // Update the global data object only if validation passes and changes were made
     if (hasChanges) {
         Object.assign(window.invoicesData[index], updatedValues);
-        // Show success toast in green
         showToast('Data saved successfully!', 'green');
     } else {
-        showToast('No changes made to the data.', 'blue'); // Optional: Inform user if no changes were made
+        showToast('No changes made to the data.', 'blue');
     }
 
     // Turn off editable and update UI
@@ -188,7 +201,6 @@ function saveRow(button, index) {
 
     console.log('Updated data:', window.invoicesData);
 }
-
 
 // Function to revert to previous values
 function revertToPreviousValues(cells) {
@@ -250,97 +262,61 @@ function addNewEntry() {
     saveButton.replaceWith(saveButton.cloneNode(true));
     const newSaveButton = document.getElementById('saveNewEntry');
 
-    document.getElementById('chemicalName').addEventListener('input', () => {
-        document.getElementById('chemicalNameError').innerText = '';
+    // Add input event listeners for real-time validation
+    validationRules.forEach(rule => {
+        const inputElement = document.getElementById(rule.name);
+        const errorElement = document.getElementById(`${rule.name}Error`);
+
+        if (inputElement) {
+            // On input, validate the field in real-time
+            inputElement.addEventListener('input', () => {
+                const value = inputElement.value.trim();
+                const result = validateField(rule.name, value);
+
+                // Display error message if validation fails
+                if (errorElement) {
+                    errorElement.innerText = result.isValid ? '' : result.error;
+                    errorElement.style.color = 'red'; // Make the error message red
+                }
+            });
+        }
     });
-    document.getElementById('vendor').addEventListener('input', () => {
-        document.getElementById('vendorError').innerText = '';
-    });
-    document.getElementById('density').addEventListener('input', () => {
-        document.getElementById('densityError').innerText = '';
-    });
-    document.getElementById('viscosity').addEventListener('input', () => {
-        document.getElementById('viscosityError').innerText = '';
-    });
-    document.getElementById('packaging').addEventListener('input', () => {
-        document.getElementById('packagingError').innerText = '';
-    });
-    document.getElementById('packSize').addEventListener('input', () => {
-        document.getElementById('packSizeError').innerText = '';
-    });
-    document.getElementById('unit').addEventListener('change', () => {
-        document.getElementById('unitError').innerText = '';
-    });
-    document.getElementById('quantity').addEventListener('input', () => {
-        document.getElementById('quantityError').innerText = '';
-    });
-    
 
     newSaveButton.addEventListener('click', () => {
+        const newEntry = {};
+        let isValid = true;
 
-        // Gather input values
-        const chemicalName = document.getElementById('chemicalName').value.trim();
-        const vendor = document.getElementById('vendor').value.trim();
-        const density = parseFloat(document.getElementById('density').value.trim());
-        const viscosity = parseFloat(document.getElementById('viscosity').value.trim());
-        const packaging = document.getElementById('packaging').value.trim();
-        const packSize = parseFloat(document.getElementById('packSize').value.trim());
-        const unit = document.getElementById('unit').value;
-        const quantity = parseFloat(document.getElementById('quantity').value.trim());
+        validationRules.forEach(rule => {
+            const inputElement = document.getElementById(rule.name);
+            if (!inputElement) {
+                console.error(`Input element with id '${rule.name}' not found`);
+                isValid = false;
+                return;
+            }
 
-        // Define validation patterns
-        const namePattern = /^[a-zA-Z\s]+$/;
-        const numberPattern = /^[+]?\d*\.?\d+$/;
-        const unitPattern = /^(kg|L)$/;
+            const value = inputElement.value.trim();
+            const result = validateField(rule.name, value);
 
-        // Perform validation
-        if (!namePattern.test(chemicalName)) {
-            document.getElementById('chemicalNameError').innerText = 'Please use alphabets only (exp: a,b,c)';
-            return;
-        }
-        if (!namePattern.test(vendor)) {
-            document.getElementById('vendorError').innerText = 'Please use alphabets only (exp: a,b,c)';
-            return;
-        }
-        if (!numberPattern.test(density.toString()) || density <= 0) {
-            document.getElementById('densityError').innerText = 'Density must be positive number';
-            return;
-        }
-        if (!numberPattern.test(viscosity.toString()) || viscosity <= 0) {
-            document.getElementById('viscosityError').innerText = 'Viscosity must be positive number';
-            return;
-        }
-        if (!namePattern.test(packaging)) {
-            document.getElementById('packagingError').innerText = 'Packaging is invalid';
-            return;
-        }
-        if (!numberPattern.test(packSize.toString()) || packSize <= 0) {
-            document.getElementById('packSizeError').innerText = 'Packsize must be a positive number';
-            return;
-        }
-        if (!unitPattern.test(unit)) {
-            document.getElementById('chemicalNameError').innerText = 'Unit must be either "kg" or "L"';
-            return;
-        }
-        if (!numberPattern.test(quantity.toString()) || quantity <= 0) {
-            document.getElementById('quantityError').innerText = 'Quantity must be positive number';
-            return;
-        }
+            const errorElement = document.getElementById(`${rule.name}Error`);
+            if (errorElement) {
+                errorElement.innerText = result.isValid ? '' : result.error;
+                errorElement.style.color = 'red';
+            } else if (!result.isValid) {
+                // If there's no error element but the validation failed, show a toast or alert
+                showToast(`${rule.label}: ${result.error}`, 'blue');
+            }
 
-        // If validation passes, create a new entry object
-        const newEntry = {
-            id: ++lastId,
-            chemicalName: chemicalName,
-            vendor: vendor,
-            density: density,
-            viscosity: viscosity,
-            packaging: packaging,
-            packSize: packSize,
-            unit: unit,
-            quantity: quantity
-        };
+            if (!result.isValid) {
+                isValid = false;
+            } else {
+                newEntry[rule.name] = result.value;
+            }
+        });
+
+        if (!isValid) return;
 
         // Add the new entry to the global data
+        newEntry.id = ++lastId;
         window.invoicesData.push(newEntry);
 
         // Update the table by adding a new row
@@ -358,7 +334,7 @@ function addNewEntry() {
                 <td contenteditable="false">${newEntry.quantity.toFixed(2)}</td>
                 <td>
                     <button class="edit-btn" onclick="editRow(this)" style="background: none; border: none; cursor: pointer;">
-                        <svg fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="24" height="24">
+                        <svg fill="none" stroke-width="1.5" stroke="#1E90FF" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="24" height="24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10"></path>
                         </svg>
                     </button>
@@ -368,12 +344,13 @@ function addNewEntry() {
                         </svg>
                     </button>
                     <button class="delete-btn" onclick="deleteRow(this)" style="background: none; border: none; cursor: pointer;">
-                        <svg fill="none" stroke-width="1.5" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="24" height="24">
+                        <svg fill="none" stroke-width="1.5" stroke="red" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" width="24" height="24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"></path>
                         </svg>
                     </button>
                 </td>
-            `;
+            </tr>
+        `;
         tableBody.insertAdjacentHTML('beforeend', newRowHTML);
 
         // Hide the modal
@@ -386,6 +363,7 @@ function addNewEntry() {
         showToast('New chemical entry added successfully!', 'green');
     });
 }
+
 
 // Function to sort
 function sortTable(column) {
@@ -452,9 +430,13 @@ function highlightRow(index) {
     const rows = document.querySelectorAll('#tableBody tr');
     rows.forEach(row => row.classList.remove('highlight')); // Remove highlight from all rows
     if (index >= 0 && index < rows.length) {
-        rows[index].classList.add('highlight'); // Add highlight to the current row
+        rows[index].classList.add('highlight'); 
         rows[index].scrollIntoView({ behavior: "smooth", block: "center" }); // Scroll the highlighted row into view
     }
+    clearTimeout(highlightTimeout);
+        highlightTimeout = setTimeout(() => {
+            rows[index].classList.remove('highlight'); // Remove highlight after timeout
+        }, 2000); 
 }
 
 // Function to navigate through the table
@@ -472,10 +454,10 @@ function navigateTable(direction) {
 document.addEventListener('keydown', (event) => {
     if (event.key === 'ArrowDown') {
         event.preventDefault(); // Prevent default scrolling behavior
-        navigateTable('down'); // Navigate down
+        navigateTable('down'); 
     } else if (event.key === 'ArrowUp') {
-        event.preventDefault(); // Prevent default scrolling behavior
-        navigateTable('up'); // Navigate up
+        event.preventDefault(); 
+        navigateTable('up'); 
     }
 });
 
