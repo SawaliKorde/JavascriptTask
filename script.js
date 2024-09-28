@@ -115,6 +115,7 @@ function cancelEdit(row) {
 }
 
 
+
 // Function to save the changes with validation
 function saveRow(button, index) {
     const row = button.closest('tr');
@@ -194,7 +195,7 @@ function revertToPreviousValues(cells) {
     cells.forEach((cell, index) => {
         cell.innerText = previousValues[index]; // Restore the previous value
         cell.setAttribute('contenteditable', 'false'); // Set back to non-editable
-        cell.style.backgroundColor = ''; // Reset background color
+        cell.style.backgroundColor = ''; 
     });
 }
 
