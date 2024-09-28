@@ -1,3 +1,6 @@
+let rowToDelete = null
+const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+
 // Function to fetch JSON data and populate the table
 async function populateTable() {
     try {
@@ -175,12 +178,33 @@ function showError(row, fieldName, message) {
 }
 
 
-// Function to delete a row
 function deleteRow(button) {
-    const row = button.closest('tr');
-    alert('Are you sure you want to delete the data?')
-    row.remove();
+    rowToDelete = button.closest('tr');
+    deleteModal.show();
 }
 
+// Confirm deletion
+document.getElementById('confirmDelete').addEventListener('click', function () {
+    if (rowToDelete) {
+        rowToDelete.remove(); // Delete the stored row
+        showToast('Row deleted successfully');
+        deleteModal.hide(); // Hide the modal after deletion
+    }
+});
+
+// Cancel deletion and hide the modal
+document.getElementById('deleteConfirmModal').addEventListener('hidden.bs.modal', function () {
+    rowToDelete = null; // Reset the stored row on modal close
+});
+
+// Show a toast notification
+function showToast(message) {
+    const toastElement = document.getElementById('liveToast');
+    const toastBody = toastElement.querySelector('.toast-body');
+    toastBody.textContent = message; // Set the message in the toast
+
+    const toast = new bootstrap.Toast(toastElement);
+    toast.show();
+}
 // Populate the table on page load
 window.onload = populateTable;
