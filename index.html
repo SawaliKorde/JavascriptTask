@@ -29,15 +29,15 @@
             <table class="table-custom">
                 <thead>
                     <tr>
-                        <th> </th>
-                        <th>Chemical Name</th>
-                        <th>Vendor</th>
-                        <th>Density (g/m²)</th>
-                        <th>Viscosity (m²/s)</th>
-                        <th>Packaging</th>
-                        <th>Pack Size</th>
-                        <th>Unit</th>
-                        <th>Quantity</th>
+                        <th>#</th>
+                        <th onclick="sortTable('chemicalName')">Chemical Name <span class="sort-arrow" id="arrow-chemicalName"></span></th>
+                        <th onclick="sortTable('vendor')">Vendor <span class="sort-arrow" id="arrow-vendor"></span></th>
+                        <th onclick="sortTable('density')">Density (g/m²) <span class="sort-arrow" id="arrow-density"></span></th>
+                        <th onclick="sortTable('viscosity')">Viscosity (m²/s) <span class="sort-arrow" id="arrow-viscosity"></span></th>
+                        <th onclick="sortTable('packaging')">Packaging <span class="sort-arrow" id="arrow-packaging"></span></th>
+                        <th onclick="sortTable('packSize')">Pack Size <span class="sort-arrow" id="arrow-packSize"></span></th>
+                        <th onclick="sortTable('unit')">Unit <span class="sort-arrow" id="arrow-unit"></span></th>
+                        <th onclick="sortTable('quantity')">Quantity <span class="sort-arrow" id="arrow-quantity"></span></th>
                         <th>Actions</th>
                     </tr>
                 </thead>

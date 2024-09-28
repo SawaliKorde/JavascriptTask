@@ -1,7 +1,10 @@
+//Variable declarations 
 let rowToDelete = null
 const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
 const addNewEntryModal = new bootstrap.Modal(document.getElementById('addNewModal'));
 let lastId = 15;
+let currentSortColumn = '';
+let currentSortOrder = 'asc';
 
 // Function to fetch JSON data and populate the table
 async function populateTable() {
@@ -332,6 +335,65 @@ function addNewEntry() {
     });
 }
 
+// Function to sort
+function sortTable(column) {
+    const tableBody = document.getElementById('tableBody');
+    const rows = Array.from(tableBody.rows);
+    
+    // Determine the sort order
+    let sortOrder = 'asc';
+    if (currentSortColumn === column && currentSortOrder === 'asc') {
+        sortOrder = 'desc';
+    }
+    
+    // Sort rows based on the column clicked
+    rows.sort((a, b) => {
+        const cellA = a.cells[getColumnIndex(column)].innerText;
+        const cellB = b.cells[getColumnIndex(column)].innerText;
+
+        if (column === 'density' || column === 'viscosity' || column === 'packSize' || column === 'quantity') {
+            return sortOrder === 'asc' ? parseFloat(cellA) - parseFloat(cellB) : parseFloat(cellB) - parseFloat(cellA);
+        } else if (column === 'unit') {
+            return sortOrder === 'asc' ? (cellA === 'kg' ? -1 : 1) : (cellA === 'kg' ? 1 : -1);
+        } else {
+            return sortOrder === 'asc' ? cellA.localeCompare(cellB) : cellB.localeCompare(cellA);
+        }
+    });
+
+    // Update table body with sorted rows
+    rows.forEach(row => tableBody.appendChild(row));
+
+    // Update current sort column and order
+    currentSortColumn = column;
+    currentSortOrder = sortOrder;
+
+    // Update sort arrows
+    updateSortArrows();
+}
+
+function getColumnIndex(column) {
+    switch (column) {
+        case 'chemicalName': return 1;
+        case 'vendor': return 2;
+        case 'density': return 3;
+        case 'viscosity': return 4;
+        case 'packaging': return 5;
+        case 'packSize': return 6;
+        case 'unit': return 7;
+        case 'quantity': return 8;
+        default: return -1;
+    }
+}
+
+function updateSortArrows() {
+    const arrows = document.querySelectorAll('.sort-arrow');
+    arrows.forEach(arrow => {
+        arrow.innerText = ''; // Clear previous arrows
+    });
+    
+    const currentArrow = document.getElementById(`arrow-${currentSortColumn}`);
+    currentArrow.innerText = currentSortOrder === 'asc' ? ' ↑' : ' ↓';
+}
 
 
 // Populate the table on page load
