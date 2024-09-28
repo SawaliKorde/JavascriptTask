@@ -6,7 +6,6 @@ let lastId = 15;
 let currentSortColumn = '';
 let currentSortOrder = 'asc';
 let currentRow = -1;
-
 // Function to fetch JSON data and populate the table
 async function populateTable() {
     try {
@@ -224,15 +223,34 @@ function addNewEntry() {
     saveButton.replaceWith(saveButton.cloneNode(true));
     const newSaveButton = document.getElementById('saveNewEntry');
 
-    newSaveButton.addEventListener('click', () => {
+    document.getElementById('chemicalName').addEventListener('input', () => {
         document.getElementById('chemicalNameError').innerText = '';
+    });
+    document.getElementById('vendor').addEventListener('input', () => {
         document.getElementById('vendorError').innerText = '';
+    });
+    document.getElementById('density').addEventListener('input', () => {
         document.getElementById('densityError').innerText = '';
+    });
+    document.getElementById('viscosity').addEventListener('input', () => {
         document.getElementById('viscosityError').innerText = '';
+    });
+    document.getElementById('packaging').addEventListener('input', () => {
         document.getElementById('packagingError').innerText = '';
+    });
+    document.getElementById('packSize').addEventListener('input', () => {
         document.getElementById('packSizeError').innerText = '';
+    });
+    document.getElementById('unit').addEventListener('change', () => {
         document.getElementById('unitError').innerText = '';
+    });
+    document.getElementById('quantity').addEventListener('input', () => {
         document.getElementById('quantityError').innerText = '';
+    });
+    
+
+    newSaveButton.addEventListener('click', () => {
+
         // Gather input values
         const chemicalName = document.getElementById('chemicalName').value.trim();
         const vendor = document.getElementById('vendor').value.trim();
