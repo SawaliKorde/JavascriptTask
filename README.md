@@ -24,7 +24,7 @@
 >**Responsive Design with Media Queries**<br />
 >Media queries are utilized to adapt the layout for medium-sized devices and phones, ensuring that the table and its functionalities remain user-friendly and visually appealing across various screen sizes.<br />
 >**LightHouse Score**<br />
->The application has been evaluated using Lighthouse, achieving a score of [insert Lighthouse score here]. This score reflects the performance, accessibility, best practices, and SEO aspects of the application, indicating a well-optimized user experience.<br /><br />
+>The application has been evaluated using Lighthouse, achieving a score of 90%. This score reflects the performance, accessibility, best practices, and SEO aspects of the application, indicating a well-optimized user experience.<br /><br />
 
 >## Why this Design Approach is Effective<br />
 >**User-Centric Experience**<br />
